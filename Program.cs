@@ -86,14 +86,14 @@ namespace NetworkAnalysis
                     Console.WriteLine("Enter choice (1-6, or 'exit' to exit): ");
 
                     choice = Console.ReadLine();
-                    choice_int = ValidateIntInput(choice);
-                    if (choice.ToLower() == "exit" || !(choice_int >= 1 && choice_int <= 6))
+                    choice_int = ValidateIntInput(choice, 1, 6);
+                    if (choice.ToLower() == "exit")
                     {
-                        if (!(choice_int <= 6 && choice_int >= 1))
-                        {
-                            Console.WriteLine("Invalid choice");
-                        }
-                        break;
+                        Environment.Exit(0); // terminate program with exit code 0
+                    }
+                    if (!(choice_int <= 6 && choice_int >= 1))
+                    {
+                        Console.WriteLine("Invalid choice");
                     }
 
                     int size = 0;
@@ -135,7 +135,7 @@ namespace NetworkAnalysis
                     }
 
                     choice = Console.ReadLine();
-                    choice_int = ValidateIntInput(choice);
+                    choice_int = ValidateIntInput(choice, 1, 4);
                     if(!(choice_int >= 1 && choice_int <= 4))
                     {
                         Console.WriteLine("Invalid choice");
@@ -177,14 +177,17 @@ namespace NetworkAnalysis
                 while(choice_int == 0)
                 {
                     Console.WriteLine("(1) Print sorted array");
-                    Console.WriteLine("(2) Search for specific value");
-                    Console.WriteLine("(3) Search for specific (or closest) value");
-                    Console.WriteLine("(4) Print every 10th element");
-                    if (selected_array.Length > 256) Console.WriteLine("(5) Print every 50th element");
+                    Console.WriteLine("(2) Linear search for specific value");
+                    Console.WriteLine("(3) Linear search for specific (or closest) value");
+                    Console.WriteLine("(4) Binary search for specific value");
+                    Console.WriteLine("(5) Binary search for specific (or closest) value");
+                    Console.WriteLine("(6) Print every 10th element");
+                    if (selected_array.Length > 256) Console.WriteLine("(7) Print every 50th element");
                     Console.WriteLine("Enter choice: ");
                     choice = Console.ReadLine();
 
-                    choice_int = ValidateIntInput(choice);
+                    if (selected_array.Length > 256) choice_int = ValidateIntInput(choice, 1, 7);
+                    else choice_int = ValidateIntInput(choice, 1, 6);
                     if(choice_int >= 1 && ((selected_array.Length > 256 && choice_int <= 5)
                         || (selected_array.Length <= 256 && choice_int <= 4)))
                     {
@@ -199,10 +202,10 @@ namespace NetworkAnalysis
                                 {
                                     Console.WriteLine("Enter target (cannot be 0): ");
                                     string target = Console.ReadLine();
-                                    target_int = ValidateIntInput(target);
+                                    target_int = TryParseInt(target);
                                     if (target_int != 0)
                                     {
-                                        SearchArray(selected_array, target_int, false);
+                                        LinearSearchArray(selected_array, target_int, false);
                                     }
                                     else
                                     {
@@ -215,10 +218,10 @@ namespace NetworkAnalysis
                                 {
                                     Console.WriteLine("Enter target (cannot be 0): ");
                                     string target = Console.ReadLine();
-                                    target_int = ValidateIntInput(target);
+                                    target_int = TryParseInt(target);
                                     if (target_int != 0)
                                     {
-                                        SearchArray(selected_array, target_int, true);
+                                        LinearSearchArray(selected_array, target_int, true);
                                     }
                                     else
                                     {
@@ -227,9 +230,41 @@ namespace NetworkAnalysis
                                 }
                                 break;
                             case 4:
-                                PrintElements(selected_array, 10);
+                                while (target_int == 0)
+                                {
+                                    Console.WriteLine("Enter target (cannot be 0): ");
+                                    string target = Console.ReadLine();
+                                    target_int = TryParseInt(target);
+                                    if (target_int != 0)
+                                    {
+                                        BinarySearchArray(selected_array, 0, selected_array.Length - 1, target_int, false);
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Invalid input: target cannot be 0");
+                                    }
+                                }
                                 break;
                             case 5:
+                                while (target_int == 0)
+                                {
+                                    Console.WriteLine("Enter target (cannot be 0): ");
+                                    string target = Console.ReadLine();
+                                    target_int = TryParseInt(target);
+                                    if (target_int != 0)
+                                    {
+                                        BinarySearchArray(selected_array, 0, selected_array.Length - 1, target_int, true);
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Invalid input: target cannot be 0");
+                                    }
+                                }
+                                break;
+                            case 6:
+                                PrintElements(selected_array, 10);
+                                break;
+                            case 7:
                                 PrintElements(selected_array, 50);
                                 break;
                         }
@@ -250,8 +285,8 @@ namespace NetworkAnalysis
             }
         }
 
-        // Function to search for all instances of an element in an array (and closest if specified)
-        public static void SearchArray(int[] int_array, int target, bool closest)
+        // Function to linearly search for all instances of an element in an array (and closest if specified)
+        public static void LinearSearchArray(int[] int_array, int target, bool closest)
         {
             int lowest_diff = 0;
             int lowest_diff_pos = 0;
@@ -282,6 +317,48 @@ namespace NetworkAnalysis
             }
         }
 
+        // Binary search function (finds exact value, closest if specified)
+        public static void BinarySearchArray(int[] int_array, int low, int high, int target, bool closest)
+        {
+            bool end = false;
+            int mid_pos = Convert.ToInt32(Math.Round(Convert.ToDouble(low + ((high - low) / 2))));
+            int mid = int_array[mid_pos];
+            if((Math.Abs(high - low) == 1) && mid != target)
+            {
+                end = true;
+                Console.WriteLine("Value not found");
+                if(mid_pos - 1 >= 0 && (Math.Abs(target - int_array[mid_pos - 1]) < Math.Abs(target - mid)))
+                {
+                    Console.WriteLine($"Closest value found: {int_array[mid_pos - 1]} | found at position: {mid_pos - 1}");
+                }
+                else if(mid_pos < int_array.Length && (Math.Abs(target - int_array[mid_pos + 1]) > Math.Abs(target - mid)))
+                {
+                    Console.WriteLine($"Closest value found: {int_array[mid_pos + 1]} | found at position: {mid_pos + 1}");
+                }
+                else
+                {
+                    Console.WriteLine($"Closest value found: {mid} | found at position: {mid_pos}");
+                }
+            }
+            if(!(end))
+            {
+                if (mid > target)
+                {
+                    int new_high = mid_pos;
+                    BinarySearchArray(int_array, low, new_high, target, closest);
+                }
+                else if (mid < target)
+                {
+                    int new_low = mid_pos;
+                    BinarySearchArray(int_array, new_low, high, target, closest);
+                }
+                else
+                {
+                    Console.WriteLine($"Value found: {mid} | found at position: {mid_pos}");
+                }
+            }
+        }
+
         // Function to reverse all elements of an array
         public static int[] ReverseArray(int[] int_array)
         {
@@ -306,7 +383,22 @@ namespace NetworkAnalysis
 
         // Function to validate an integer input for when selecting options from menus
         // Returns 0 if invalid, or the integer value itself if valid
-        public static int ValidateIntInput(string input)
+        public static int ValidateIntInput(string input, int bottom_limit, int top_limit)
+        {
+            int value = 0;
+            try
+            {
+                int input_int = int.Parse(input);
+                if (value >= bottom_limit && value <= top_limit) value = input_int;
+            }
+            catch(FormatException)
+            {
+                // do nothing, return value as 0
+            }
+            return value;
+        }
+
+        public static int TryParseInt(string input)
         {
             int value = 0;
             try
