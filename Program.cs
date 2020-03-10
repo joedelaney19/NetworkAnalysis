@@ -33,6 +33,7 @@ namespace NetworkAnalysis
                     string file_name = "Net_" + string.Concat(i) + "_" + string.Concat(j) + ".txt";
                     string full_path = path_input + @"\" + file_name;
 
+                    // populate each array based on the numbers stored in i and j
                     switch (i)
                     {
                         case 1:
@@ -69,6 +70,13 @@ namespace NetworkAnalysis
                 }
             }
 
+            // Initialise integer arrays for merged lists
+            int[] Net_256_Merge = new int[512];
+            int[] Net_2048_Merge = new int[4096];
+            MergeArrays(Net_1_256, Net_3_256).CopyTo(Net_256_Merge, 0);
+            MergeArrays(Net_1_2048, Net_3_2048).CopyTo(Net_2048_Merge, 0);
+
+            // Initialise choice variable and list to temporarily store selected array
             string choice = "";
             List<int> selected_list = new List<int>();
             while (choice != "exit")
@@ -83,43 +91,79 @@ namespace NetworkAnalysis
                     Console.WriteLine("(4) Net_2_2048");
                     Console.WriteLine("(5) Net_3_256");
                     Console.WriteLine("(6) Net_3_2048");
-                    Console.WriteLine("Enter choice (1-6, or 'exit' to exit): ");
+                    Console.WriteLine("(7) Net_256_Merge (1_256 and 3_256 merged file)");
+                    Console.WriteLine("(8) Net_2048_Merge (1_2048 and 3_2048 merged file");
+                    Console.WriteLine("Enter choice (1-8, or 'exit' to exit): ");
 
                     choice = Console.ReadLine();
-                    choice_int = ValidateIntInput(choice, 1, 6);
+                    choice_int = ValidateIntInput(choice, 1, 8);
                     if (choice.ToLower() == "exit")
                     {
                         Environment.Exit(0); // terminate program with exit code 0
                     }
-                    if (!(choice_int <= 6 && choice_int >= 1))
+                    if (choice_int == 0)
                     {
                         Console.WriteLine("Invalid choice");
                     }
 
+                    // select a size for the temporary array based on choice
                     int size = 0;
-                    if (choice_int % 2 == 1)
+                    if(choice_int == 1 || choice_int == 3 || choice_int == 5)
                     {
-                        size = 256;
+                        size = 256; 
                     }
-                    else
+                    else if(choice_int == 2 || choice_int == 4 || choice_int == 6)
                     {
                         size = 2048;
                     }
+                    else if(choice_int == 7)
+                    {
+                        size = 512;
+                    }
+                    else if(choice_int == 8)
+                    {
+                        size = 4096;
+                    }
 
-                    if (choice_int == 1) CopyArrayToList(Net_1_256, selected_list, size);
-                    if (choice_int == 2) CopyArrayToList(Net_1_2048, selected_list, size);
-                    if (choice_int == 3) CopyArrayToList(Net_2_256, selected_list, size);
-                    if (choice_int == 4) CopyArrayToList(Net_2_2048, selected_list, size);
-                    if (choice_int == 5) CopyArrayToList(Net_3_256, selected_list, size);
-                    if (choice_int == 6) CopyArrayToList(Net_3_2048, selected_list, size);
+                    switch(choice_int)
+                    {
+                        case 1:
+                            CopyArrayToList(Net_1_256, selected_list, size);
+                            break;
+                        case 2:
+                            CopyArrayToList(Net_1_2048, selected_list, size);
+                            break;
+                        case 3:
+                            CopyArrayToList(Net_2_256, selected_list, size);
+                            break;
+                        case 4:
+                            CopyArrayToList(Net_2_2048, selected_list, size);
+                            break;
+                        case 5:
+                            CopyArrayToList(Net_3_256, selected_list, size);
+                            break;
+                        case 6:
+                            CopyArrayToList(Net_3_2048, selected_list, size);
+                            break;
+                        case 7:
+                            CopyArrayToList(Net_256_Merge, selected_list, size);
+                            break;
+                        case 8:
+                            CopyArrayToList(Net_2048_Merge, selected_list, size);
+                            break;
+                        default:
+                            // do nothing
+                            break;
+                    }
                 }
 
+                // convert list to array
                 int[] selected_array = selected_list.ToArray();
                 choice_int = 0;
                 while(choice_int == 0)
                 {
                     Console.Clear();
-                    if (selected_array.Length < 257) // recommend simpler sorting algorithms for smaller data sets
+                    if (selected_array.Length < 513) // recommend simpler sorting algorithms for smaller data sets
                     {
                         Console.WriteLine("(1) Bubble Sort (recommended)");
                         Console.WriteLine("(2) Insertion Sort (recommended)");
@@ -162,7 +206,6 @@ namespace NetworkAnalysis
                         break;
                 }
 
-                Console.Clear();
                 if(choice.ToLower() == "desc")
                 {
                     selected_array = ReverseArray(selected_array);
@@ -188,8 +231,10 @@ namespace NetworkAnalysis
 
                     if (selected_array.Length > 256) choice_int = ValidateIntInput(choice, 1, 7);
                     else choice_int = ValidateIntInput(choice, 1, 6);
-                    if(choice_int >= 1 && ((selected_array.Length > 256 && choice_int <= 5)
-                        || (selected_array.Length <= 256 && choice_int <= 4)))
+
+                    // 
+                    if(choice_int >= 1 && ((selected_array.Length > 256 && choice_int <= 7)
+                        || (selected_array.Length <= 256 && choice_int <= 6)))
                     {
                         int target_int = 0;
                         switch(choice_int)
@@ -237,7 +282,7 @@ namespace NetworkAnalysis
                                     target_int = TryParseInt(target);
                                     if (target_int != 0)
                                     {
-                                        BinarySearchArray(selected_array, 0, selected_array.Length - 1, target_int, false);
+                                        BinarySearchArray(selected_array, 0, selected_array.Length - 1, target_int, false, 0);
                                     }
                                     else
                                     {
@@ -253,7 +298,7 @@ namespace NetworkAnalysis
                                     target_int = TryParseInt(target);
                                     if (target_int != 0)
                                     {
-                                        BinarySearchArray(selected_array, 0, selected_array.Length - 1, target_int, true);
+                                        BinarySearchArray(selected_array, 0, selected_array.Length - 1, target_int, true, 0);
                                     }
                                     else
                                     {
@@ -288,18 +333,20 @@ namespace NetworkAnalysis
         // Function to linearly search for all instances of an element in an array (and closest if specified)
         public static void LinearSearchArray(int[] int_array, int target, bool closest)
         {
+            int counter = 0;
             int lowest_diff = 0;
             int lowest_diff_pos = 0;
             bool found = false;
             for(int pos = 0; pos < int_array.Length; pos++)
             {
+                counter++;
                 if (int_array[pos] == target)
                 {
                     Console.WriteLine($"Value found: {int_array[pos]} | found at position: {pos}");
+                    Console.WriteLine($"Total operations: {counter}");
                     found = true;
                 }
                 int difference = Math.Abs(target - int_array[pos]);
-
                 if (pos == 0)
                 {
                     lowest_diff = difference;
@@ -314,15 +361,21 @@ namespace NetworkAnalysis
             {
                 Console.WriteLine("Target not found");
                 Console.WriteLine($"Closest value found: {lowest_diff} | found at position: {lowest_diff_pos}");
+                Console.WriteLine($"Total operations: {counter}");
             }
         }
 
         // Binary search function (finds exact value, closest if specified)
-        public static void BinarySearchArray(int[] int_array, int low, int high, int target, bool closest)
+        public static void BinarySearchArray(int[] int_array, int low, int high, int target, bool closest, int counter)
         {
+            counter++;
             bool end = false;
+            // choose mid value in array for start of binary search
             int mid_pos = Convert.ToInt32(Math.Round(Convert.ToDouble(low + ((high - low) / 2))));
             int mid = int_array[mid_pos];
+
+            // code for if binary search tree reaches 1 node and only node isn't target - used for getting
+            // closest value
             if((Math.Abs(high - low) == 1) && mid != target)
             {
                 end = true;
@@ -339,22 +392,24 @@ namespace NetworkAnalysis
                 {
                     Console.WriteLine($"Closest value found: {mid} | found at position: {mid_pos}");
                 }
+                Console.WriteLine($"Total operations: {counter}");
             }
             if(!(end))
             {
                 if (mid > target)
                 {
                     int new_high = mid_pos;
-                    BinarySearchArray(int_array, low, new_high, target, closest);
+                    BinarySearchArray(int_array, low, new_high, target, closest, counter); // recursively sort left array
                 }
                 else if (mid < target)
                 {
                     int new_low = mid_pos;
-                    BinarySearchArray(int_array, new_low, high, target, closest);
+                    BinarySearchArray(int_array, new_low, high, target, closest, counter); // recursively sort right array
                 }
                 else
                 {
                     Console.WriteLine($"Value found: {mid} | found at position: {mid_pos}");
+                    Console.WriteLine($"Total operations: {counter}");
                 }
             }
         }
@@ -389,7 +444,7 @@ namespace NetworkAnalysis
             try
             {
                 int input_int = int.Parse(input);
-                if (value >= bottom_limit && value <= top_limit) value = input_int;
+                if (input_int >= bottom_limit && input_int <= top_limit) value = input_int;
             }
             catch(FormatException)
             {
@@ -413,6 +468,7 @@ namespace NetworkAnalysis
             return value;
         }
 
+        // Function to populate array from a file
         public static void PopulateArray(string path, int[] a)
         {
             try
@@ -432,6 +488,7 @@ namespace NetworkAnalysis
 
         static void BubbleSort(int[] a)
         {
+            int counter = 0;
             // get array length
             int n = a.Length;
 
@@ -444,13 +501,16 @@ namespace NetworkAnalysis
                         int temp = a[j];
                         a[j] = a[j + 1];
                         a[j + 1] = temp;
+                        counter++;
                     }
                 }
             }
+            Console.WriteLine($"Total operations: {counter}");
         }
 
         static void InsertionSort(int[] a)
         {
+            int counter = 0;
             int n = a.Length;
             int i; // define i here so we can use outside scope of for loop
             int sorted = 1; // number of array elements that have been sorted
@@ -465,6 +525,7 @@ namespace NetworkAnalysis
                     if (currentTemp < a[i - 1])
                     {
                         a[i] = a[i - 1];
+                        counter++;
                     }
                     else
                     {
@@ -475,6 +536,7 @@ namespace NetworkAnalysis
                 a[i] = currentTemp;
                 sorted++;
             }
+            Console.WriteLine($"Total operations: {counter}");
         }
 
         // ----
@@ -520,6 +582,7 @@ namespace NetworkAnalysis
             {
                 temp[i] = a[i];
             }
+            // counter += 3;
 
             // sort lower half
             MergeSortRecursive(temp, a, low, mid - 1);
@@ -540,7 +603,7 @@ namespace NetworkAnalysis
         // Quicksort starts here
         // ----
 
-        public static void Partition(int[] a, int left, int right)
+        public static int Partition(int[] a, int left, int right, int counter)
         {
             int i, j; // initialize local left, right vars
             int pivot, temp; // initialize local pivot and temporary int for swapping
@@ -561,16 +624,33 @@ namespace NetworkAnalysis
                     a[j] = temp;
                     i++;
                     j--;
+                    counter++;
                 }
             } while (i <= j);
 
-            if (left < j) Partition(a, left, j); // recursively sort left array
-            if (i < right) Partition(a, i, right); // recursively sort right array
+            if (left < j) Partition(a, left, j, counter); // recursively sort left array
+            if (i < right) Partition(a, i, right, counter); // recursively sort right array
+
+            return counter;
         }
 
         public static void QuickSort(int[] a)
         {
-            Partition(a, 0, a.Length - 1);
+            int counter = Partition(a, 0, a.Length - 1, 0);
+            Console.WriteLine($"Total operations: {counter}");
+        }
+
+        // Function to merge two integer arrays
+        public static int[] MergeArrays(int[] array1, int[] array2)
+        {
+            int size = array1.Length + array2.Length;
+            int[] new_array = new int[size];
+            for(int i = 0; i < array1.Length; i += 2)
+            {
+                new_array[i] = array1[i];
+                new_array[i + 1] = array2[i];
+            }
+            return new_array;
         }
     }
 }
