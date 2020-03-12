@@ -582,28 +582,32 @@ namespace NetworkAnalysis
             {
                 temp[i] = a[i];
             }
-            // counter += 3;
 
             // sort lower half
+            Counter.IncrementCount();
             MergeSortRecursive(temp, a, low, mid - 1);
+            Counter.IncrementCount();
             // sort upper half
             MergeSortRecursive(a, temp, mid, high);
             // merge
+            Counter.IncrementCount();
             Merge(a, temp, low, mid, high);
         }
 
         static void MergeSort(int[] a)
         {
+            Counter.ResetCount();
             int n = a.Length;
             int[] temp = new int[n];
             MergeSortRecursive(a, temp, 0, n - 1);
+            Console.WriteLine($"Total operations: {Counter.GetCount()}");
         }
 
         // ----
         // Quicksort starts here
         // ----
 
-        public static int Partition(int[] a, int left, int right, int counter)
+        public static void Partition(int[] a, int left, int right)
         {
             int i, j; // initialize local left, right vars
             int pivot, temp; // initialize local pivot and temporary int for swapping
@@ -624,20 +628,21 @@ namespace NetworkAnalysis
                     a[j] = temp;
                     i++;
                     j--;
-                    counter++;
+                    Counter.IncrementCount();
                 }
             } while (i <= j);
 
-            if (left < j) Partition(a, left, j, counter); // recursively sort left array
-            if (i < right) Partition(a, i, right, counter); // recursively sort right array
-
-            return counter;
+            Counter.IncrementCount();
+            if (left < j) Partition(a, left, j); // recursively sort left array
+            Counter.IncrementCount();
+            if (i < right) Partition(a, i, right); // recursively sort right array
         }
 
         public static void QuickSort(int[] a)
         {
-            int counter = Partition(a, 0, a.Length - 1, 0);
-            Console.WriteLine($"Total operations: {counter}");
+            Counter.ResetCount();
+            Partition(a, 0, a.Length - 1);
+            Console.WriteLine($"Total operations: {Counter.GetCount()}");
         }
 
         // Function to merge two integer arrays
@@ -651,6 +656,26 @@ namespace NetworkAnalysis
                 new_array[i + 1] = array2[i];
             }
             return new_array;
+        }
+    }
+
+    // Static class used as a counter for counting ONLY merge sort and quicksort steps
+    static class Counter
+    {
+        public static int count = 0;
+        public static void IncrementCount()
+        {
+            count++;
+        }
+
+        public static int GetCount()
+        {
+            return count;
+        }
+
+        public static void ResetCount()
+        {
+            count = 0;
         }
     }
 }
